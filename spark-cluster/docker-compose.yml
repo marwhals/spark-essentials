@@ -1,4 +1,5 @@
 version: "3.7"
+
 services:
   spark-master:
     image: spydernaz/spark-master:latest
@@ -7,10 +8,13 @@ services:
       - "9090:8080"
       - "7077:7077"
     volumes:
-       - ./apps:/opt/spark-apps
-       - ./data:/opt/spark-data
+      - ./apps:/opt/spark-apps
+      - ./data:/opt/spark-data
     environment:
       - "SPARK_LOCAL_IP=spark-master"
+    networks:
+      - spark-network
+
   spark-worker:
     image: spydernaz/spark-worker:latest
     depends_on:
@@ -22,5 +26,11 @@ services:
       - SPARK_DRIVER_MEMORY=128m
       - SPARK_EXECUTOR_MEMORY=256m
     volumes:
-       - ./apps:/opt/spark-apps
-       - ./data:/opt/spark-data
+      - ./apps:/opt/spark-apps
+      - ./data:/opt/spark-data
+    networks:
+      - spark-network
+
+networks:
+  spark-network:
+    driver: bridge

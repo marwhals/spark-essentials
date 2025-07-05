@@ -19,9 +19,9 @@ libraryDependencies ++= Seq(
   "org.apache.logging.log4j" % "log4j-core" % "2.20.0"
 )
 
-// Use Java 21 features
-javacOptions ++= Seq("--release", "21")
-scalacOptions ++= Seq("-target:jvm-21")
+// Use Java 11 -- More recent Java will not work
+javacOptions ++= Seq("-source", "11", "-target", "11")
+scalacOptions += "-target:jvm-11"
 
 // Run Spark correctly in forked JVM
 fork in run := true
