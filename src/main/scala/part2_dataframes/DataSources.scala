@@ -107,10 +107,31 @@ object DataSources extends App {
     .load()
 
   /**
-   * TODO Exercise - Read the movies DF, then write it as
+   * Exercise - Read the movies DF, then write it as
    * - tab-separated values file
    * - snappy Parquet
    * - table "public.movies" in the projects Postgres DB
    */
+
+  val moviesDF = spark.read.json("src/main/resources/data/movies.json")
+
+  //Tab separated values
+  moviesDF.write
+    .format("csv")
+    .option("header", "true")
+    .option("sep", "\t")
+    .save("src/main/resources/data/movies.csv")
+
+  // parquet
+  moviesDF.write.save("src/main/resources/data/movies.parquet")
+
+  // save to DB
+  moviesDF.write
+    .format("jdbc")
+    .option("driver", driver)
+    .option("url", url)
+    .option("user", password)
+    .option("dtable", "public.movies")
+    .save()
 
 }
