@@ -92,9 +92,9 @@ object RDDs extends App {
    *
    * Datasets over RDDs
    * - Can perform select and join
-   * - Spark can plan/optimise before running code
+   * - Spark can plan / optimise before running code
    *
-   * For 99% of operations, use the DataFrame/ Dataset APIs
+   * For 99% of operations, use the DataFrame / Dataset APIs
    *
    */
 

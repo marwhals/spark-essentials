@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Total Movie Gross by Genre (Plotly)</title>
+<script src="https://cdn.plot.ly/plotly-1.52.2.min.js"></script>
+</head>
+<body>
+<div id="chart"></div>
+<script>
+(function () {
+  var data0 = {"x":["Adventure","Action","Comedy","Drama","Thriller/Suspense","Horror","Romantic Comedy","Musical","Black Comedy","Western","Documentary","Concert/Performance"],"name":"Total Gross ($)","y":[4.0385182512E10,2.8022179498E10,2.602948005E10,1.9548366514E10,9.933277995E9,6.74425553E9,5.435628275E9,1.729447404E9,4.34340609E8,2.78980216E8,2.49167862E8,1.54718302E8],"type":"bar"};
+
+  var data = [data0];
+  var layout = {"title":"Total Movie Gross by Genre (Plotly)","yaxis":{"title":"Total Gross ($)"},"xaxis":{"title":"Genre"}};
+ var config = {};
+
+  Plotly.plot('chart', data, layout, config);
+})();
+</script>
+</body>
+</html>
+       

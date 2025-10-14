@@ -1,14 +1,23 @@
 package part2_dataframes
 
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{SparkSession, functions}
-import org.apache.spark.sql.functions.{approx_count_distinct, avg, col, count, countDistinct, mean, stddev}
+import part2_dataframes.ColumnsAndExpressions.spark
+import plotly.Plotly._
+import plotly._
+import plotly.layout._
 
 object Aggregations extends App {
 
   val spark = SparkSession.builder()
     .appName("Aggregations and Grouping")
     .config("spark.master", "local")
+//    .config("spark.rapids.sql.enabled", "true")               // Enable RAPIDS
+//    .config("spark.executor.resource.gpu.amount", "1")        // 1 GPU per executor
+//    .config("spark.task.resource.gpu.amount", "0.1")          // Fractional GPU per task
     .getOrCreate()
+
+  spark.sparkContext.setLogLevel("ERROR")
 
   val moviesDF = spark.read
     .option("inferSchema", "true")
@@ -65,6 +74,34 @@ object Aggregations extends App {
    * 3) - Show the mean and standard deviation of US gross revenue for the movies
    * 4) - Compute the average IMDB rating and the average US gross revenue per director.
    */
+  import spark.implicits._
+
+  // 1
+  moviesDF
+    .select((col("US_Gross") + col("Worldwide_Gross") + col("US_DVD_Sales")).as("Total_Gross"))
+    .select(sum("Total_Gross"))
+    .show()
+
+  // 2
+  moviesDF
+    .select(countDistinct(col("Director")))
+    .show()
+
+  // 3
+  moviesDF.select(
+    mean("US_Gross"),
+    stddev("US_Gross")
+  ).show()
+
+  // 4
+  moviesDF
+    .groupBy("Director")
+    .agg(
+      avg("IMDB_Rating").as("Avg_Rating"),
+      sum("US_Gross").as("Total_US_Gross")
+    )
+    .orderBy(col("Avg_Rating").desc_nulls_last)
+    .show()
 
   /**
    * Wide transformations
@@ -73,5 +110,30 @@ object Aggregations extends App {
    * ---> This is a computationally very expensive operation
    * ---> be careful when doing data aggregations and grouping. It is best done at the end of processing.
    */
+
+  // Compute total gross by genre
+  val grossByGenre = moviesDF
+    .groupBy($"Major_Genre")
+    .agg(sum($"US_Gross" + $"Worldwide_Gross" + $"US_DVD_Sales").as("Total_Gross"))
+    .na.drop()
+    .orderBy(desc("Total_Gross"))
+
+  // Collect to driver for visualization
+  val genres = grossByGenre.select("Major_Genre").as[String].collect()
+  val totals = grossByGenre.select("Total_Gross").as[Double].collect()
+
+  // ===========================================================
+  // 🎨 Plotly (Interactive) Example
+  // ===========================================================
+  val trace = Bar(genres.toSeq, totals.toSeq).withName("Total Gross ($)")
+  val layout = Layout()
+    .withTitle("Total Movie Gross by Genre (Plotly)")
+    .withXaxis(Axis().withTitle("Genre"))
+    .withYaxis(Axis().withTitle("Total Gross ($)"))
+
+  plot(
+    "charts/plotly-movies.html",
+    Seq(trace),
+    layout) // Opens interactive HTML in browser
 
 }

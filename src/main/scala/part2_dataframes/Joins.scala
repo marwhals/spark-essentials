@@ -8,8 +8,8 @@ import org.apache.spark.sql.functions.expr
  * - Combine data from multiple DataFrames
  * - one (or more) columns from table 1 (left) is compared with one (or more) columns from table 2 (right)
  * ---> If the condition passes, rows are combined
- * ---> Non matching rows are discarded
- * Important: These are wide transformations. i.e very expensive.
+ * ---> Non-matching rows are discarded
+ * Important: These are wide transformations. i.e. very expensive.
  */
 
 object Joins extends App {
