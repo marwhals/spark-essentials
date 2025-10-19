@@ -2,12 +2,16 @@ package part3_types_and_datasets
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.{col, initcap, lit, not, regexp_extract, regexp_replace}
+import part2_dataframes.Joins.spark
 
 object CommonTypes extends App {
   val spark = SparkSession.builder()
     .appName("Common Spark Types")
     .config("spark.master", "local")
     .getOrCreate()
+
+  // Suppress logs
+  spark.sparkContext.setLogLevel("ERROR")
 
   val moviesDF = spark.read
     .option("inferSchema", "true")
@@ -61,7 +65,7 @@ object CommonTypes extends App {
   )
 
   /**
-   * TODO: Exercise
+   * Exercise
    *
    * Filter the cars DF by a list of car names obtained by an API call
    * Versions:
@@ -69,6 +73,21 @@ object CommonTypes extends App {
    *   - regexes
    */
 
+  def getCarNames: List[String] = List("Volkswagen", "Mercedes-Benz", "Ford")
 
+  // using regex
+  val complexRegex = getCarNames.map(_.toLowerCase()).mkString("|")
+
+  carsDF.select(
+      col("Name"),
+      regexp_extract(col("Name"), complexRegex, 0).as("regex_extract")
+    ).where(col("regex_extract") =!= "")
+    .drop("regex_extract")
+    .show()
+
+  // using contains
+  val carNameFilters = getCarNames.map(_.toLowerCase()).map(name => col("Name").contains(name))
+  val bigFilter = carNameFilters.fold(lit(false))((combinedFilter, newCarNameFilter) => combinedFilter or newCarNameFilter)
+  carsDF.filter(bigFilter).show
 
 }

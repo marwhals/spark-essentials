@@ -77,7 +77,7 @@ object Datasets extends App {
   val carNamesDS = carsDS.map(car => car.Name.toUpperCase())
 
   /**
-   * TODO Exercises:
+   * Exercises:
    * 1. Count how many cars we have
    * 2. Count how many powerful cars we have (HP > 140)
    * 3. Average HP for the entire dataset
