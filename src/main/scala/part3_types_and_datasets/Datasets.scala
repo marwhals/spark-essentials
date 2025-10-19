@@ -1,8 +1,10 @@
 package part3_types_and_datasets
 
-import java.sql.Date
+import org.apache.spark.sql.functions.{avg, col}
 
+import java.sql.Date
 import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession}
+import part3_types_and_datasets.CommonTypes.spark
 
 /**
  * Datasets
@@ -19,8 +21,9 @@ import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession}
  *  - That is after Spark has had a change to optimise all the operations in advance.
  *    - Spark will have to evaluate all the filters and transformations on a row-by-row basis which is very slow
  *
- * TypeSafety then use DataSets
- * Fast performance then use DataFrames
+ * Tradeoffs:
+ * - TypeSafety --> then use DataSets
+ * - Fast performance --> then use DataFrames
  *
  * Subtle Note: DataFrame = Dataset[Row] i.e same thing but using the "Row" type
  */
@@ -31,6 +34,8 @@ object Datasets extends App {
     .appName("Datasets")
     .config("spark.master", "local")
     .getOrCreate()
+
+  spark.sparkContext.setLogLevel("ERROR")
 
   val numbersDF: DataFrame = spark.read
     .format("csv")
@@ -82,5 +87,20 @@ object Datasets extends App {
    * 2. Count how many powerful cars we have (HP > 140)
    * 3. Average HP for the entire dataset
    */
+
+  // 1
+  val carsCount = carsDS.count
+  println(carsCount)
+
+  // 2
+  println(carsDS.filter(_.Horsepower.getOrElse(0L) > 140).count)
+
+  // 3
+  println(carsDS.map(_.Horsepower.getOrElse(0L)).reduce(_ + _)/ carsCount)
+
+  // alternative
+  carsDS.select(avg(col("Horsepower"))).show
+
+
 
 }
