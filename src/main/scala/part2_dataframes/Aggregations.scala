@@ -68,7 +68,7 @@ object Aggregations extends App {
     .orderBy(col("Avg_Rating"))
 
   /**
-   * TODO - Exercises
+   * Exercises
    * 1) - Sum up all the profits of all the movies in the DF
    * 2) - Count how many distinct directors we have
    * 3) - Show the mean and standard deviation of US gross revenue for the movies
@@ -123,7 +123,7 @@ object Aggregations extends App {
   val totals = grossByGenre.select("Total_Gross").as[Double].collect()
 
   // ===========================================================
-  // 🎨 Plotly (Interactive) Example
+  // Plotly (Interactive) Example
   // ===========================================================
   val trace = Bar(genres.toSeq, totals.toSeq).withName("Total Gross ($)")
   val layout = Layout()
