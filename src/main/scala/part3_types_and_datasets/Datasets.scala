@@ -1,6 +1,6 @@
 package part3_types_and_datasets
 
-import org.apache.spark.sql.functions.{avg, col}
+import org.apache.spark.sql.functions.{array_contains, avg, col}
 
 import java.sql.Date
 import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession}
@@ -101,6 +101,36 @@ object Datasets extends App {
   // alternative
   carsDS.select(avg(col("Horsepower"))).show
 
+  /**
+   * Joins
+   */
+  case class Guitar(id: Long, make: String, model: String, guitarType: String)
+  case class GuitarPlayer(id: Long, name: String, guitars: Seq[Long], band: Long)
+  case class Band(id: Long, name: String, hometown: String, year: Long)
+
+  val guitarsDS = readDF("guitars_data/guitars.json").as[Guitar]
+  val guitarPlayersDS = readDF("guitars_data/guitarPlayers.json").as[GuitarPlayer]
+  val bandsDS = readDF("guitars_data/bands.json").as[Band]
+
+  val guitarPlayerBandsDS: Dataset[(GuitarPlayer, Band)] = guitarPlayersDS.joinWith(bandsDS, guitarPlayersDS.col("band") === bandsDS.col("id"), "inner") // Can rename the columns using ".withColumnRenamed"
+  guitarPlayersDS.show
+
+  /**
+   * Exercise: Join the guitarDS and guitarPlayersDS in an outer join (hint: use array_contains)
+   */
+
+  guitarPlayersDS
+    .joinWith(guitarsDS, array_contains(guitarPlayersDS.col("guitars"), guitarsDS.col("id")), "outer")
+    .show()
+
+  // Grouping DS
+
+  val carsGroupedByOrigin = carsDS
+    .groupByKey(_.Origin)
+    .count()
+    .show()
+
+  // joins and groups are wide transformations -> they can change the number of partitions that will back those data sets. This leads to shuffle operations
 
 
 }
