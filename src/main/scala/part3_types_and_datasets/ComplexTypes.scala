@@ -1,7 +1,7 @@
 package part3_types_and_datasets
 
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.{col, current_date, current_timestamp, datediff, to_date}
+import org.apache.spark.sql.functions._
 
 object ComplexTypes extends App {
 
@@ -9,6 +9,11 @@ object ComplexTypes extends App {
     .appName("Complex Data Types")
     .config("spark.master", "local")
     .getOrCreate()
+
+  // Suppress logs
+  spark.sparkContext.setLogLevel("ERROR")
+
+  spark.conf.set("spark.sql.legacy.timeParserPolicy", "LEGACY") // Allows for Spark 2 date time parser
 
   val moviesDF = spark.read
     .option("inferSchema", "true")
@@ -30,5 +35,43 @@ object ComplexTypes extends App {
    * 1) - How do we deal with multiple date formats?
    * 2) - Read the stock DF and part the dates
    */
+
+  // 1 - parse the DF multiple times, then union the small DFs
+
+  // 2
+  val stocksDF = spark.read.format("csv")
+    .option("inferSchema", "true")
+    .option("header", "true")
+    .load("src/main/resources/data/stocks.csv")
+
+  val stocksDFWithDates = stocksDF
+    .withColumn("actual_date", to_date(col("date"), "MMM dd yyyy"))
+
+  stocksDFWithDates.show()
+
+  // structures
+
+  // 1 - with column operators
+  moviesDF
+    .select(col("Title"), struct(col("US_Gross"), col("Worldwide_Gross")).as("Profit"))
+    .select(col("Title"), col("Profit").getField("US_Gross").as("US_Profit"))
+
+  // 2 - with expression strings
+  moviesDF
+    .selectExpr("Title", "(US_Gross, Worldwide_Gross) as Profit")
+    .selectExpr("Title", "Profit.US_Gross")
+
+  moviesDF.show()
+
+  // Arrays
+
+  val moviesWithWords = moviesDF.select(col("Title"), split(col("Title"), " | ").as("Title_words"))
+
+  moviesWithWords.select(
+    col("Title"),
+    expr("Title_Words[0]"), // indexing
+    size(col("Title_Words")), // array size
+    array_contains(col("Title_Words"), "Love") // look for value in array
+  ).show()
 
 }
