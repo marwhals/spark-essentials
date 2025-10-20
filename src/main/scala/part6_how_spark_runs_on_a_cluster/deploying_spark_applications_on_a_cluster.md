@@ -23,8 +23,7 @@
 
 ---
 
-Cluster mode 
-- 
+Cluster mode
 - the Spark driver is launched on a worker node
 - the cluster manager is responsible for Spark processes
 - All communication between the spark driver and the spark executors will be done inside the cluster
