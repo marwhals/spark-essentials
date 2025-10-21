@@ -12,9 +12,9 @@ object Aggregations extends App {
   val spark = SparkSession.builder()
     .appName("Aggregations and Grouping")
     .config("spark.master", "local")
-//    .config("spark.rapids.sql.enabled", "true")               // Enable RAPIDS
-//    .config("spark.executor.resource.gpu.amount", "1")        // 1 GPU per executor
-//    .config("spark.task.resource.gpu.amount", "0.1")          // Fractional GPU per task
+    .config("spark.rapids.sql.enabled", "true")               // Enable RAPIDS
+    .config("spark.executor.resource.gpu.amount", "1")        // 1 GPU per executor
+    .config("spark.task.resource.gpu.amount", "0.1")          // Fractional GPU per task
     .getOrCreate()
 
   spark.sparkContext.setLogLevel("ERROR")
